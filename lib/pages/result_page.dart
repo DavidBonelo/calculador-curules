@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ResultPage extends StatelessWidget {
@@ -6,60 +8,69 @@ class ResultPage extends StatelessWidget {
     required this.partiesQuantity,
     required this.curulesQuantity,
     required this.totalValidVotes,
-    required this.names,
-    required this.votes,
+    required this.partiesNames,
+    required this.partiesVotes,
     required this.umbral,
   }) : super(key: key);
 
   final int partiesQuantity;
   final int curulesQuantity;
   final int totalValidVotes;
-  final List<String> names;
-  final List<double> votes;
+  final List<String> partiesNames;
+  final List<double> partiesVotes;
 
   final double umbral;
-  // List<List<double>> matrix = [];
-  // List<double> top100 = [];
-  // double cifraRepartidora = 0;
-  // List<double> partiesCurulesQuantity = [];
 
   @override
   Widget build(BuildContext context) {
-    // final double _umbral = curulesQuantity > 2
-    //     ? validVotesNumber * 0.03
-    //     : validVotesNumber / curulesQuantity * 0.3;
-    List<List<double>> _matrix = [];
+    // List<List<double>> _matrix = [];
     // actually top n*
     List<double> _top100 = [];
     double _cifraRepartidora = 0;
+    Map<String, double> _partiesVotesAboveUmbral = {};
+    Map<String, double> _partiesVotesBelowUmbral = {};
     List<double> _partiesCurulesQuantity = [];
 
-    for (var i = 1; i <= curulesQuantity; i++) {
-      List<double> _partyVotes = [];
+    for (var j = 0; j < partiesVotes.length; j++) {
+      if (partiesVotes[j] >= umbral) {
+        _partiesVotesAboveUmbral.addAll({partiesNames[j]: partiesVotes[j]});
 
-      for (var j = 0; j < votes.length; j++) {
-        var innerValue = votes[j] / i;
-        _partyVotes.add(innerValue);
+        // _top100.sort();
 
-        _top100.sort();
-
-        _top100.add(innerValue);
+      } else {
+        _partiesVotesBelowUmbral.addAll({partiesNames[j]: partiesVotes[j]});
       }
+    }
 
-      _matrix.add(_partyVotes);
-      // print(_partidoValues);
+    for (var i = 1; i <= curulesQuantity; i++) {
+      // List<double> _partyVotes = [];
+
+      _partiesVotesAboveUmbral.forEach((key, value) {
+        //
+        var innerValue = value / i;
+        _top100.add(innerValue);
+
+        // _partyVotes.add(innerValue);
+      });
+
+      // _matrix.add(_partyVotes);
     }
 //   // print(matrix);
     _top100.sort();
+    // pick the topN values
     _top100.removeRange(0, _top100.length - curulesQuantity);
 //   // print(_top100.length);
 
 // cifra repartidora is the lowest value from the topN
     _cifraRepartidora = _top100.first;
 
-    for (var i = 0; i < partiesQuantity; i++) {
-      _partiesCurulesQuantity.add(votes[i] / _cifraRepartidora);
-    }
+    final List<int> _partiesCurulesDecimals = [];
+
+    _partiesVotesAboveUmbral.forEach((key, value) {
+      var _partiesCurules = value / _cifraRepartidora;
+      _partiesCurulesQuantity.add(_partiesCurules);
+      _partiesCurulesDecimals.add(getDecimals(_partiesCurules));
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -82,9 +93,9 @@ Cifra repartidora: $_cifraRepartidora'''),
                 itemCount: partiesQuantity,
                 itemBuilder: (_, index) {
                   return ListTile(
-                    title: Text(names[index]),
-                    trailing: Text(
-                        _partiesCurulesQuantity[index].truncate().toString()),
+                    title: Text(partiesNames[index]),
+                    trailing: Text(_partiesCurulesQuantity[index].toString()),
+                    // _partiesCurulesQuantity[index].truncate().toString()),
                   );
                 },
                 separatorBuilder: (_, i) {
@@ -97,4 +108,10 @@ Cifra repartidora: $_cifraRepartidora'''),
       ),
     );
   }
+}
+
+int getDecimals(double number) {
+  final decimals = ((number % 1) * pow(10, 4)).floor();
+  print(decimals);
+  return decimals;
 }

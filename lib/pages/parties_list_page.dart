@@ -53,8 +53,8 @@ class _PartiesListPageState extends State<PartiesListPage> {
                           curulesQuantity: widget.curulesQuantity,
                           totalValidVotes: widget.validVotesNumber,
                           partiesQuantity: widget.partiesQuantity,
-                          names: _names,
-                          votes: _votes,
+                          partiesNames: _names,
+                          partiesVotes: _votes,
                           umbral: widget.umbral,
                         ),
                       )),
@@ -143,7 +143,6 @@ class _PartiesListPageState extends State<PartiesListPage> {
             : [0, 0];
     // print(_numbers);
 
-    // Rebuilds the OperationsButtonsV2 widget with the updated _numbers
     setState(() {});
   }
 }
